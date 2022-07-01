@@ -1,5 +1,6 @@
 # pyprover
-A Python-based theorem prover
+A Python-based theorem prover  
+Only intuitionistic propositional logic is supported now.
 
 ## Usage
 ### Create venv & Install requirements
@@ -16,6 +17,15 @@ pip3 install -r requirements.txt
 ```shell
 python3 interactive.py
 ```
+
+### Propositional symbols
+| Symbol | Name    |
+|--------|---------|
+| ->     | implies |
+| /\\    | and     |
+| \\/    | or      |
+| ~      | not     |
+
 
 ### Tactics
 n : assumption number
