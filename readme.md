@@ -17,10 +17,6 @@ pip3 install -r requirements.txt
 python3 interactive.py
 ```
 
-### Basic example
-![](example.png)
-
-
 ### Tactics
 n : assumption number
 - assumption()
@@ -30,3 +26,7 @@ n : assumption number
 - left()
 - right()
 - destruct(n)
+
+### Basic example
+![](example.png)
+
