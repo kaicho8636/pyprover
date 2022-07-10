@@ -4,7 +4,6 @@ or_symbol = '\\/'
 
 
 class Prover:
-
     def __init__(self, goal):
         self.goal = goal
         self.variables = []

@@ -3,6 +3,10 @@ from lark import Lark, Transformer, v_args
 
 @v_args(inline=True)
 class PropParseTree(Transformer):
+    def __init__(self, prop_vars):
+        super().__init__()
+        self.prop_vars = prop_vars
+
     def l_then(self, a, b):
         return PropNode("->", a, b)
 
@@ -16,7 +20,10 @@ class PropParseTree(Transformer):
         return PropNode("->", a, PropNode("False"))
 
     def identifier(self, symbol):
-        return PropNode(symbol)
+        if symbol in self.prop_vars:
+            return PropNode(symbol)
+        else:
+            raise Exception(f"Propositional variable '{symbol}' not defined")
 
     def l_true(self):
         return PropNode("True")
@@ -26,7 +33,7 @@ class PropParseTree(Transformer):
 
 
 with open("proposition.lark", "r", encoding="utf-8") as grammar:
-    parser = Lark(grammar, parser="lalr", transformer=PropParseTree())
+    parser = Lark(grammar, parser="lalr")
 
 
 class PropNode:
@@ -75,9 +82,3 @@ class PropNode:
             if not self.evaluate({var: b for var, b in zip(variables, pattern)}):
                 return False
         return True
-
-
-if __name__ == '__main__':
-    while True:
-        print(parser.parse(input('< ')).is_tautology())
-        print()
