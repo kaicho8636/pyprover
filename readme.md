@@ -1,6 +1,6 @@
 # pyprover
 A Python-based theorem prover  
-Only intuitionistic propositional logic is supported now.
+This only supports intuitionistic propositional logic.
 
 ## Usage
 ### Create venv & Install requirements
