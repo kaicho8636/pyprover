@@ -1,6 +1,11 @@
 from lark import Lark, Transformer, v_args
 
 
+then_symbol = '→'
+and_symbol = '∧'
+or_symbol = '∨'
+
+
 @v_args(inline=True)
 class PropParseTree(Transformer):
     def __init__(self, prop_vars):
@@ -8,16 +13,16 @@ class PropParseTree(Transformer):
         self.prop_vars = prop_vars
 
     def l_then(self, a, b):
-        return PropNode("->", a, b)
+        return PropNode("→", a, b)
 
     def l_and(self, a, b):
-        return PropNode("/\\", a, b)
+        return PropNode("∧", a, b)
 
     def l_or(self, a, b):
-        return PropNode("\\/", a, b)
+        return PropNode("∨", a, b)
 
     def l_not(self, a):
-        return PropNode("->", a, PropNode("False"))
+        return PropNode("→", a, PropNode("False"))
 
     def identifier(self, symbol):
         if symbol in self.prop_vars:
@@ -52,7 +57,7 @@ class PropNode:
         return self.symbol == other.symbol and self.left == other.left and self.right == other.right
 
     def get_vars(self):
-        if self.symbol in ['/\\', '\\/', '->']:
+        if self.symbol in [and_symbol, or_symbol, then_symbol]:
             return self.left.get_vars() + self.right.get_vars()
         elif self.symbol in ['False', 'True']:
             return []
@@ -60,11 +65,11 @@ class PropNode:
             return [self.symbol]
 
     def evaluate(self, dictionary):
-        if self.symbol == '/\\':
+        if self.symbol == and_symbol:
             return self.left.evaluate(dictionary) and self.right.evaluate(dictionary)
-        elif self.symbol == '\\/':
+        elif self.symbol == or_symbol:
             return self.left.evaluate(dictionary) or self.right.evaluate(dictionary)
-        elif self.symbol == '->':
+        elif self.symbol == then_symbol:
             return not self.left.evaluate(dictionary) or self.left.evaluate(dictionary)
         elif self.symbol == 'False':
             return False

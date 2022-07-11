@@ -1,6 +1,4 @@
-then_symbol = '->'
-and_symbol = '/\\'
-or_symbol = '\\/'
+from proposition import then_symbol, and_symbol, or_symbol
 
 
 class Prover:

@@ -21,10 +21,10 @@ python3 interactive.py
 ### Propositional symbols
 | Symbol | Name    |
 |--------|---------|
-| ->     | implies |
-| /\\    | and     |
-| \\/    | or      |
-| ~      | not     |
+| →, ->  | implies |
+| ∧, /\\ | and     |
+| ∨, \\/ | or      |
+| ￢, ~   | not     |
 
 
 ### Tactics
