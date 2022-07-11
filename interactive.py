@@ -1,13 +1,17 @@
 from prover import Prover
-from proposition import PropParseTree, parser as prop_parser
+from proposition import PropNameError, PropParseTree, parser as prop_parser
 
 
 def main():
-    prover = Prover(
-        PropParseTree(set(input('Proposition variables? < ').split())).transform(
-            prop_parser.parse(input('Proposition? < '))
-        )
-    )
+    prop_parse_tree = PropParseTree(set(input('Proposition variables? < ').split()))
+    while True:
+        try:
+            goal = prop_parse_tree.transform(prop_parser.parse(input('Proposition? < ')))
+        except Exception as e:
+            print(e)
+        else:
+            break
+    prover = Prover(goal)
     while True:
         if prover.goal is None:
             print('No more goals.')

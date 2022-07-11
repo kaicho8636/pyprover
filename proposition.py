@@ -6,6 +6,10 @@ and_symbol = '∧'
 or_symbol = '∨'
 
 
+class PropNameError(Exception):
+    pass
+
+
 @v_args(inline=True)
 class PropParseTree(Transformer):
     def __init__(self, prop_vars):
@@ -28,7 +32,7 @@ class PropParseTree(Transformer):
         if symbol in self.prop_vars:
             return PropNode(symbol)
         else:
-            raise Exception(f"Propositional variable '{symbol}' not defined")
+            raise PropNameError(f"Propositional variable '{symbol}' not defined")
 
     def l_true(self):
         return PropNode("True")
