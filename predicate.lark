@@ -1,0 +1,20 @@
+?start: expr
+
+?expr: a
+     | a ("→"|"->") expr  -> l_then
+
+?a: b
+  | b ("∧"|"/\\") a       -> l_and
+?b: c
+  | c ("∨"|"\\/") b       -> l_or
+?c: d
+  | ("￢"|"~") c           -> l_not
+?d: NAME                  -> identifier
+  | "True"                -> l_true
+  | "False"               -> l_false
+  | "(" expr ")"
+
+%import common.CNAME -> NAME
+%import common.WS_INLINE
+
+%ignore WS_INLINE
