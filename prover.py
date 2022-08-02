@@ -69,7 +69,7 @@ class Prover:
             del self.variables[number]
             return False
         elif self.variables[number].symbol == or_symbol:
-            temp = self.variables
+            temp = self.variables[:]
             temp[number] = temp[number].right
             self.subgoals.append((self.goal, temp))
             self.variables[number] = self.variables[number].left
