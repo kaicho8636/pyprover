@@ -1,13 +1,14 @@
-from proposition import then_symbol, and_symbol, or_symbol
+from xmlrpc.client import Boolean
+from proposition import PropNode, then_symbol, and_symbol, or_symbol
 
 
 class Prover:
-    def __init__(self, goal):
+    def __init__(self, goal: PropNode):
         self.goal = goal
         self.variables = []
         self.subgoals = []  # [(goal, variables), ...]
 
-    def assumption(self):
+    def assumption(self) -> bool:
         if self.goal in self.variables:
             self.goal = None
             if self.subgoals:
@@ -16,7 +17,7 @@ class Prover:
         else:
             return True
 
-    def intro(self):
+    def intro(self) -> bool:
         if self.goal.symbol == then_symbol:
             self.variables.append(self.goal.left)
             self.goal = self.goal.right
@@ -24,7 +25,7 @@ class Prover:
         else:
             return True
 
-    def apply(self, number):
+    def apply(self, number) -> bool:
         if len(self.variables) <= number:
             return True
         elif (self.variables[number].symbol == then_symbol
@@ -34,7 +35,7 @@ class Prover:
         else:
             return True
 
-    def split(self):
+    def split(self) -> bool:
         if self.goal.symbol == and_symbol:
             self.subgoals.append((self.goal.right, self.variables))
             self.goal = self.goal.left
@@ -56,7 +57,7 @@ class Prover:
         else:
             return True
 
-    def destruct(self, number):
+    def destruct(self, number) -> bool:
         if len(self.variables) <= number:
             return True
         elif self.variables[number].symbol == and_symbol:
@@ -73,5 +74,12 @@ class Prover:
         else:
             return True
 
-    def qed(self):
-        return
+    def specialize(self, map, domain) -> bool:
+        if len(self.variables) <= min(map, domain):
+            return True
+        elif (self.variables[map].symbol != "→"
+              or self.variables[map].left != self.variables[domain]):
+            return True
+        else:
+            self.variables[map] = self.variables[map].right
+            return False

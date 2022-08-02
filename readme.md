@@ -32,6 +32,7 @@ n : assumption number
 - assumption()
 - intro()
 - apply(n)
+- specialize(m, n)
 - split()
 - left()
 - right()
