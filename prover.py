@@ -1,5 +1,8 @@
-from xmlrpc.client import Boolean
 from proposition import PropNode, then_symbol, and_symbol, or_symbol
+
+
+def dn(prop):
+    return PropNode("→", PropNode("→", prop, PropNode("False")), PropNode("False"))
 
 
 class Prover:
@@ -83,3 +86,7 @@ class Prover:
         else:
             self.variables[map] = self.variables[map].right
             return False
+
+    def add_dn(self):
+        self.goal = dn(self.goal)
+        return False

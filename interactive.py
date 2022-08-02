@@ -1,5 +1,5 @@
 from prover import Prover
-from proposition import PropNameError, PropParseTree, parser as prop_parser
+from proposition import PropParseTree, parser as prop_parser
 
 
 def main():
