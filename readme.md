@@ -1,5 +1,5 @@
 # pyprover
-A Python-based theorem prover
+A simple theorem prover, which has a coq-like interactive interface and supports classical logic.
 
 ## Usage
 ### Create venv & Install requirements
