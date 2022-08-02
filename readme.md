@@ -27,7 +27,7 @@ python3 interactive.py
 
 
 ### Tactics
-n : assumption number
+m, n : assumption number
 - assumption()
 - intro()
 - apply(n)
