@@ -1,6 +1,5 @@
 # pyprover
-A Python-based theorem prover  
-This only supports intuitionistic propositional logic.
+A Python-based theorem prover
 
 ## Usage
 ### Create venv & Install requirements
@@ -37,6 +36,7 @@ n : assumption number
 - left()
 - right()
 - destruct(n)
+- add_dn()
 
 ### Basic example
 ```
