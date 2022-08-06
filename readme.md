@@ -38,6 +38,8 @@ m, n : assumption number
 - destruct(n)
 - add_dn()
 
+You can also use undo()
+
 ### Basic example
 ```
 Proposition variables? < p r s
