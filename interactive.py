@@ -1,3 +1,4 @@
+import readline
 from prover import Prover
 from proposition import PropParseTree, parser as prop_parser
 
