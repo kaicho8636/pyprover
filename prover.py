@@ -1,3 +1,4 @@
+from copy import deepcopy
 from proposition import PropNode, then_symbol, and_symbol, or_symbol
 
 
@@ -10,8 +11,23 @@ class Prover:
         self.goal = goal
         self.variables = []
         self.subgoals = []  # [(goal, variables), ...]
+        self.undos = []
+
+    def __set_undo(self):
+        self.undos.append(deepcopy((self.goal
+                                   ,self.variables
+                                   ,self.subgoals)))
+
+    def undo(self):
+        if not self.undos:
+            return False
+        else:
+            (self.goal
+            ,self.variables
+            ,self.subgoals) = self.undos.pop()
 
     def assumption(self) -> bool:
+        self.__set_undo()
         if self.goal in self.variables:
             self.goal = None
             if self.subgoals:
@@ -21,6 +37,7 @@ class Prover:
             return True
 
     def intro(self) -> bool:
+        self.__set_undo()
         if self.goal.symbol == then_symbol:
             self.variables.append(self.goal.left)
             self.goal = self.goal.right
@@ -29,6 +46,7 @@ class Prover:
             return True
 
     def apply(self, number) -> bool:
+        self.__set_undo()
         if len(self.variables) <= number:
             return True
         elif (self.variables[number].symbol == then_symbol
@@ -39,6 +57,7 @@ class Prover:
             return True
 
     def split(self) -> bool:
+        self.__set_undo()
         if self.goal.symbol == and_symbol:
             self.subgoals.append((self.goal.right, self.variables))
             self.goal = self.goal.left
@@ -47,6 +66,7 @@ class Prover:
             return True
 
     def left(self):
+        self.__set_undo()
         if self.goal.symbol == or_symbol:
             self.goal = self.goal.left
             return False
@@ -54,6 +74,7 @@ class Prover:
             return True
 
     def right(self):
+        self.__set_undo()
         if self.goal.symbol == or_symbol:
             self.goal = self.goal.right
             return False
@@ -61,6 +82,7 @@ class Prover:
             return True
 
     def destruct(self, number) -> bool:
+        self.__set_undo()
         if len(self.variables) <= number:
             return True
         elif self.variables[number].symbol == and_symbol:
@@ -78,6 +100,7 @@ class Prover:
             return True
 
     def specialize(self, map, domain) -> bool:
+        self.__set_undo()
         if len(self.variables) <= min(map, domain):
             return True
         elif (self.variables[map].symbol != "→"
@@ -88,5 +111,6 @@ class Prover:
             return False
 
     def add_dn(self):
+        self.__set_undo()
         self.goal = dn(self.goal)
         return False
