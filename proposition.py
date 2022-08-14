@@ -12,9 +12,8 @@ class PropNameError(Exception):
 
 @v_args(inline=True)
 class PropParseTree(Transformer):
-    def __init__(self, prop_vars):
+    def __init__(self):
         super().__init__()
-        self.prop_vars = prop_vars
 
     def l_then(self, a, b):
         return PropNode("→", a, b)
@@ -29,10 +28,7 @@ class PropParseTree(Transformer):
         return PropNode("→", a, PropNode("False"))
 
     def identifier(self, symbol):
-        if symbol in self.prop_vars:
-            return PropNode(symbol)
-        else:
-            raise PropNameError(f"Propositional variable '{symbol}' not defined")
+        return PropNode(symbol)
 
     def l_true(self):
         return PropNode("True")

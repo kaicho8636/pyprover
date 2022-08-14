@@ -14,17 +14,13 @@ class Prover:
         self.undos = []
 
     def __set_undo(self):
-        self.undos.append(deepcopy((self.goal
-                                   ,self.variables
-                                   ,self.subgoals)))
+        self.undos.append(deepcopy((self.goal, self.variables, self.subgoals)))
 
     def undo(self):
         if not self.undos:
             return False
         else:
-            (self.goal
-            ,self.variables
-            ,self.subgoals) = self.undos.pop()
+            (self.goal, self.variables, self.subgoals) = self.undos.pop()
 
     def assumption(self) -> bool:
         self.__set_undo()
@@ -50,7 +46,7 @@ class Prover:
         if len(self.variables) <= number:
             return True
         elif (self.variables[number].symbol == then_symbol
-                and self.variables[number].right == self.goal):
+              and self.variables[number].right == self.goal):
             self.goal = self.variables[number].left
             return False
         else:
@@ -99,15 +95,15 @@ class Prover:
         else:
             return True
 
-    def specialize(self, map, domain) -> bool:
+    def specialize(self, function, domain) -> bool:
         self.__set_undo()
-        if len(self.variables) <= min(map, domain):
+        if len(self.variables) <= min(function, domain):
             return True
-        elif (self.variables[map].symbol != "→"
-              or self.variables[map].left != self.variables[domain]):
+        elif (self.variables[function].symbol != "→"
+              or self.variables[function].left != self.variables[domain]):
             return True
         else:
-            self.variables[map] = self.variables[map].right
+            self.variables[function] = self.variables[function].right
             return False
 
     def add_dn(self):

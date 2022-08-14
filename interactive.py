@@ -4,7 +4,7 @@ from proposition import PropParseTree, parser as prop_parser
 
 
 def main():
-    prop_parse_tree = PropParseTree(set(input('Proposition variables? < ').split()))
+    prop_parse_tree = PropParseTree()
     while True:
         try:
             goal = prop_parse_tree.transform(prop_parser.parse(input('Proposition? < ')))
