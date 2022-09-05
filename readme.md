@@ -28,17 +28,17 @@ python3 interactive.py
 
 ### Tactics
 m, n : assumption number
-- assumption()
-- intro()
-- apply(n)
-- specialize(m, n)
-- split()
-- left()
-- right()
-- destruct(n)
-- add_dn()
+- assumption
+- intro
+- apply n
+- specialize m n
+- split
+- left
+- right
+- destruct n
+- add_dn
 
-You can also use undo()
+You can also use 'undo'
 
 ### Basic example
 ```
@@ -49,21 +49,21 @@ Proposition? < (p->r\/s)->((p->r)\/(p->s))
   ============================
   ((p → (r ∨ s)) → ((p → r) ∨ (p → s)))
 
-pyprover < intro()
+pyprover < intro
 1 goal
 
   H0 : (p → (r ∨ s))
   ============================
   ((p → r) ∨ (p → s))
 
-pyprover < add_dn()
+pyprover < add_dn
 1 goal
 
   H0 : (p → (r ∨ s))
   ============================
   ((((p → r) ∨ (p → s)) → False) → False)
 
-pyprover < intro()
+pyprover < intro
 1 goal
 
   H0 : (p → (r ∨ s))
@@ -71,7 +71,7 @@ pyprover < intro()
   ============================
   False
 
-pyprover < apply(1)
+pyprover < apply 1
 1 goal
 
   H0 : (p → (r ∨ s))
@@ -79,7 +79,7 @@ pyprover < apply(1)
   ============================
   ((p → r) ∨ (p → s))
 
-pyprover < left()
+pyprover < left
 1 goal
 
   H0 : (p → (r ∨ s))
@@ -87,7 +87,7 @@ pyprover < left()
   ============================
   (p → r)
 
-pyprover < intro()
+pyprover < intro
 1 goal
 
   H0 : (p → (r ∨ s))
@@ -96,7 +96,7 @@ pyprover < intro()
   ============================
   r
 
-pyprover < specialize(0, 2)
+pyprover < specialize 0 2
 1 goal
 
   H0 : (r ∨ s)
@@ -105,7 +105,7 @@ pyprover < specialize(0, 2)
   ============================
   r
 
-pyprover < destruct(0)
+pyprover < destruct 0
 2 goals
 
   H0 : r
@@ -117,7 +117,7 @@ pyprover < destruct(0)
 goal 2 is:
 r
 
-pyprover < assumption()
+pyprover < assumption
 1 goal
 
   H0 : s
@@ -126,7 +126,7 @@ pyprover < assumption()
   ============================
   r
 
-pyprover < add_dn()
+pyprover < add_dn
 1 goal
 
   H0 : s
@@ -135,7 +135,7 @@ pyprover < add_dn()
   ============================
   ((r → False) → False)
 
-pyprover < intro()
+pyprover < intro
 1 goal
 
   H0 : s
@@ -145,7 +145,7 @@ pyprover < intro()
   ============================
   False
 
-pyprover < apply(1)
+pyprover < apply 1
 1 goal
 
   H0 : s
@@ -155,7 +155,7 @@ pyprover < apply(1)
   ============================
   ((p → r) ∨ (p → s))
 
-pyprover < right()
+pyprover < right
 1 goal
 
   H0 : s
@@ -165,7 +165,7 @@ pyprover < right()
   ============================
   (p → s)
 
-pyprover < intro()
+pyprover < intro
 1 goal
 
   H0 : s
@@ -176,7 +176,7 @@ pyprover < intro()
   ============================
   s
 
-pyprover < assumption()
+pyprover < assumption
 No more goals.
 ```
 

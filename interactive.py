@@ -49,10 +49,13 @@ def main():
             if not words:
                 continue
             if words[0] not in tactic_dict:
-                print(f'{tactic}: {words[0]} is not a valid tactic')
+                print(f'{tactic}: invalid tactic')
                 continue
             if len(words)-1 != tactic_dict[words[0]][1]:
                 print(f'{tactic}: {tactic_dict[words[0]][1]} argument(s) expected but given {len(words)-1}')
+                continue
+            if not all(map(lambda arg: arg.isdigit(), words[1:])):
+                print(f'{tactic}: invalid argument(s)')
                 continue
             if tactic_dict[words[0]][0](*map(int, words[1:])):
                 print(f'{tactic}: tactic failed')

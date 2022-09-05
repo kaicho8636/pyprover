@@ -1,1 +1,0 @@
-from prover import Prover
