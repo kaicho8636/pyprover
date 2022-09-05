@@ -13,6 +13,17 @@ def main():
         else:
             break
     prover = Prover(goal)
+    tactic_dict = {
+        "undo": (prover.undo, 0),
+        "intro": (prover.intro, 0),
+        "assumption": (prover.assumption, 0),
+        "apply": (prover.apply, 1),
+        "left": (prover.left, 0),
+        "right": (prover.right, 0),
+        "destruct": (prover.destruct, 1),
+        "specialize": (prover.specialize, 2),
+        "add_dn": (prover.add_dn, 0)
+    }
     while True:
         if prover.goal is None:
             print('No more goals.')
@@ -30,7 +41,21 @@ def main():
                 print(f'goal {i+2} is:')
                 print(goal[0])
                 print()
-        eval('prover.' + input('pyprover < '))
+        tactics = input('pyprover < ')
+        if not tactics:
+            continue
+        for tactic in tactics.split(";"):
+            words = tactic.split()
+            if not words:
+                continue
+            if words[0] not in tactic_dict:
+                print(f'{tactic}: {words[0]} is not a valid tactic')
+                continue
+            if len(words)-1 != tactic_dict[words[0]][1]:
+                print(f'{tactic}: {tactic_dict[words[0]][1]} argument(s) expected but given {len(words)-1}')
+                continue
+            if tactic_dict[words[0]][0](*map(int, words[1:])):
+                print(f'{tactic}: tactic failed')
 
 
 if __name__ == '__main__':

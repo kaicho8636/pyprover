@@ -16,11 +16,12 @@ class Prover:
     def __set_undo(self):
         self.undos.append(deepcopy((self.goal, self.variables, self.subgoals)))
 
-    def undo(self):
+    def undo(self) -> bool:
         if not self.undos:
-            return False
+            return True
         else:
             (self.goal, self.variables, self.subgoals) = self.undos.pop()
+            return False
 
     def assumption(self) -> bool:
         self.__set_undo()
