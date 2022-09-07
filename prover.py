@@ -94,6 +94,12 @@ class Prover:
             self.subgoals.append((self.goal, temp))
             self.variables[number] = self.variables[number].left
             return False
+        elif self.variables[number].symbol == 'False':
+            self.__set_undo()
+            self.goal = None
+            if self.subgoals:
+                (self.goal, self.variables) = self.subgoals.pop()
+            return False
         else:
             return True
 
@@ -148,7 +154,9 @@ class Prover:
                 else:
                     self.undo()
             if not self.destruct(i):
-                if ans := self.auto():
+                if self.goal is None:
+                    return [f"destruct {i}"]
+                elif ans := self.auto():
                     return [f"destruct {i}"] + ans
                 else:
                     self.undo()
