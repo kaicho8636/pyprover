@@ -8,7 +8,7 @@
 ?b: c
   | c ("∨"|"\\/") b       -> l_or
 ?c: d
-  | ("￢"|"~") c           -> l_not
+  | ("¬"|"~") c           -> l_not
 ?d: NAME                  -> identifier
   | "True"                -> l_true
   | "False"               -> l_false

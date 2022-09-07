@@ -23,7 +23,7 @@ python3 interactive.py
 | →, ->  | implies |
 | ∧, /\\ | and     |
 | ∨, \\/ | or      |
-| ￢, ~   | not     |
+| ¬, ~   | not     |
 
 
 ### Tactics
@@ -37,6 +37,7 @@ m, n : assumption number
 - right
 - destruct n
 - add_dn
+- auto (This tactic only supports intuitionistic logic)
 
 You can also use 'undo'
 

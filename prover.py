@@ -111,3 +111,50 @@ class Prover:
         self.__set_undo()
         self.goal = dn(self.goal)
         return False
+
+    def auto(self) -> [str]:
+        if not self.assumption():
+            if self.goal is None:
+                return ["assumption"]
+            elif ans := self.auto():
+                return ["assumption"] + ans
+            else:
+                self.undo()
+        if not self.intro():
+            if ans := self.auto():
+                return ["intro"] + ans
+            else:
+                self.undo()
+        if not self.split():
+            if ans := self.auto():
+                return ["split"] + ans
+            else:
+                self.undo()
+        if not self.left():
+            if ans := self.auto():
+                return ["left"] + ans
+            else:
+                self.undo()
+        if not self.right():
+            if ans := self.auto():
+                return ["right"] + ans
+            else:
+                self.undo()
+        for i in range(len(self.variables)):
+            if not self.apply(i):
+                if ans := self.auto():
+                    return [f"apply {i}"] + ans
+                else:
+                    self.undo()
+            if not self.destruct(i):
+                if ans := self.auto():
+                    return [f"destruct {i}"] + ans
+                else:
+                    self.undo()
+            for j in range(len(self.variables)):
+                if not self.specialize(i, j):
+                    if ans := self.auto():
+                        return [f"specialize {i} {j}"] + ans
+                    else:
+                        self.undo()
+        return []

@@ -48,16 +48,22 @@ def main():
             words = tactic.split()
             if not words:
                 continue
-            if words[0] not in tactic_dict:
+            elif words == ['auto']:
+                if results := prover.auto():
+                    for result in results:
+                        print(f'auto: {result}')
+                else:
+                    print(f'auto: tactic failed(Could not find proof)')
+            elif words[0] not in tactic_dict:
                 print(f'{tactic}: invalid tactic')
                 continue
-            if len(words)-1 != tactic_dict[words[0]][1]:
+            elif len(words)-1 != tactic_dict[words[0]][1]:
                 print(f'{tactic}: {tactic_dict[words[0]][1]} argument(s) expected but given {len(words)-1}')
                 continue
-            if not all(map(lambda arg: arg.isdigit(), words[1:])):
+            elif not all(map(lambda arg: arg.isdigit(), words[1:])):
                 print(f'{tactic}: invalid argument(s)')
                 continue
-            if tactic_dict[words[0]][0](*map(int, words[1:])):
+            elif tactic_dict[words[0]][0](*map(int, words[1:])):
                 print(f'{tactic}: tactic failed')
 
 
