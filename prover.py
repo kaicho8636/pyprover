@@ -2,7 +2,7 @@ from copy import deepcopy
 from proposition import PropNode, then_symbol, and_symbol, or_symbol
 
 
-def dn(prop):
+def dn(prop: PropNode):
     return PropNode("→", PropNode("→", prop, PropNode("False")), PropNode("False"))
 
 
@@ -42,7 +42,7 @@ class Prover:
         else:
             return True
 
-    def apply(self, number) -> bool:
+    def apply(self, number: int) -> bool:
         if len(self.variables) <= number:
             return True
         elif (self.variables[number].symbol == then_symbol
@@ -78,7 +78,7 @@ class Prover:
         else:
             return True
 
-    def destruct(self, number) -> bool:
+    def destruct(self, number: int) -> bool:
         if len(self.variables) <= number:
             return True
         elif self.variables[number].symbol == and_symbol:
@@ -158,4 +158,51 @@ class Prover:
                     if ans := self.auto():
                         return [f"specialize {i} {j}"] + ans
                     self.undo()
+        return []
+
+    def auto_classical(self, depth_limit: int = 10) -> [str]:
+        if depth_limit <= 0:
+            return []
+        if not self.assumption():
+            if self.goal is None:
+                return ["assumption"]
+            if ans := self.auto_classical(depth_limit-1):
+                return ["assumption"] + ans
+            self.undo()
+        if not self.intro():
+            if ans := self.auto_classical(depth_limit-1):
+                return ["intro"] + ans
+            self.undo()
+        if not self.split():
+            if ans := self.auto_classical(depth_limit-1):
+                return ["split"] + ans
+            self.undo()
+        if not self.left():
+            if ans := self.auto_classical(depth_limit-1):
+                return ["left"] + ans
+            self.undo()
+        if not self.right():
+            if ans := self.auto_classical(depth_limit-1):
+                return ["right"] + ans
+            self.undo()
+        for i in range(len(self.variables)):
+            if not self.destruct(i):
+                if self.goal is None:
+                    return [f"destruct {i}"]
+                if ans := self.auto_classical(depth_limit-1):
+                    return [f"destruct {i}"] + ans
+                self.undo()
+            if not self.apply(i):
+                if ans := self.auto_classical(depth_limit-1):
+                    return [f"apply {i}"] + ans
+                self.undo()
+            for j in range(len(self.variables)):
+                if not self.specialize(i, j):
+                    if ans := self.auto_classical(depth_limit-1):
+                        return [f"specialize {i} {j}"] + ans
+                    self.undo()
+        if not self.add_dn():
+            if ans := self.auto_classical(depth_limit-1):
+                return ["add_dn"] + ans
+            self.undo()
         return []

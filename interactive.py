@@ -54,6 +54,23 @@ def main():
                         print(f'auto: {result}')
                 else:
                     print(f'auto: tactic failed(Could not find proof)')
+            elif words[0] == 'auto_classical':
+                if len(words) == 1:
+                    if results := prover.auto_classical():
+                        for result in results:
+                            print(f'auto_classical: {result}')
+                    else:
+                        print(f'auto_classical: tactic failed(Could not find proof)')
+                elif len(words) != 2:
+                    print(f'{tactic}: 0 or 1 argument expected but given {len(words) - 1}')
+                    continue
+                elif not words[1].isdigit():
+                    print(f'{tactic}: invalid argument')
+                elif results := prover.auto_classical(int(words[1])):
+                    for result in results:
+                        print(f'auto_classical: {result}')
+                else:
+                    print(f'auto: tactic failed(Could not find proof)')
             elif words[0] not in tactic_dict:
                 print(f'{tactic}: invalid tactic')
                 continue
