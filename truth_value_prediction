@@ -1,0 +1,270 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/kaicho8636/pyprover/blob/master/truth_value_prediction\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "id": "x7CdSiz0SSdN"
+      },
+      "outputs": [],
+      "source": [
+        "import tensorflow as tf\n",
+        "from tensorflow import keras\n",
+        "from tensorflow.keras import layers\n",
+        "from keras import optimizers"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 2,
+      "metadata": {
+        "id": "R9TX_b22RAJx"
+      },
+      "outputs": [],
+      "source": [
+        "import pickle\n",
+        "from tqdm import tqdm\n",
+        "\n",
+        "def pickle_dump(obj, path):\n",
+        "    with open(path, mode='wb') as f:\n",
+        "        pickle.dump(obj,f)\n",
+        "\n",
+        "def pickle_load(path):\n",
+        "    with open(path, mode='rb') as f:\n",
+        "        data = pickle.load(f)\n",
+        "        return data "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "s0USSaraeDSy"
+      },
+      "outputs": [],
+      "source": [
+        "input_data = pickle_load('input_data-3.pickle')\n",
+        "output_data = pickle_load('output_data-3.pickle')"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "qAy4Jo5vSPoL"
+      },
+      "outputs": [],
+      "source": [
+        "from sklearn.model_selection import train_test_split\n",
+        "import numpy as np\n",
+        "X_train, X_test_val, Y_train, Y_test_val = train_test_split(input_data, output_data,\n",
+        "                                                    test_size=0.1, random_state=42)\n",
+        "\n",
+        "X_test, X_val = X_test_val[:len(X_test_val)//2], X_test_val[len(X_test_val)//2:]\n",
+        "Y_test, Y_val = Y_test_val[:len(Y_test_val)//2], Y_test_val[len(Y_test_val)//2:]\n",
+        "\n",
+        "maxlen = 49\n",
+        "vocab_size = 9"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "q9wRFvjvc8Hr"
+      },
+      "outputs": [],
+      "source": [
+        "X_train = keras.preprocessing.sequence.pad_sequences(X_train, maxlen=maxlen)\n",
+        "X_val = keras.preprocessing.sequence.pad_sequences(X_val, maxlen=maxlen)\n",
+        "X_test = keras.preprocessing.sequence.pad_sequences(X_test, maxlen=maxlen)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "QzF5A9XPdReS"
+      },
+      "outputs": [],
+      "source": [
+        "Y_train = np.array(Y_train)\n",
+        "Y_val = np.array(Y_val)\n",
+        "Y_test = np.array(Y_test)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 3,
+      "metadata": {
+        "id": "idTrjoNFiNzY"
+      },
+      "outputs": [],
+      "source": [
+        "class TokenAndPositionEmbedding(layers.Layer):\n",
+        "    def __init__(self, maxlen, vocab_size, embed_dim):\n",
+        "        super(TokenAndPositionEmbedding, self).__init__()\n",
+        "        self.token_emb = layers.Embedding(input_dim=vocab_size, output_dim=embed_dim, mask_zero=True)\n",
+        "        self.pos_emb = layers.Embedding(input_dim=maxlen, output_dim=embed_dim, mask_zero=True)\n",
+        "\n",
+        "    def call(self, x):\n",
+        "        maxlen = tf.shape(x)[-1]\n",
+        "        positions = tf.range(start=0, limit=maxlen, delta=1)\n",
+        "        positions = self.pos_emb(positions)\n",
+        "        x = self.token_emb(x)\n",
+        "        return x + positions"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 4,
+      "metadata": {
+        "id": "S2XYX-_QiqHv"
+      },
+      "outputs": [],
+      "source": [
+        "from keras.callbacks import LearningRateScheduler\n",
+        "def decay_schedule(epoch, lr):\n",
+        "    if not epoch == 0:\n",
+        "        lr = lr * 0.95 \n",
+        "    return lr "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def FCBlock(x, drop, lay_size, add_att):  \n",
+        "    x = layers.Dropout(drop)(x) \n",
+        "    x = layers.Dense(lay_size)(x)\n",
+        "    if add_att != None:\n",
+        "        x = layers.Add()([x,add_att])\n",
+        "    x = layers.BatchNormalization()(x)\n",
+        "    x = layers.Activation('relu')(x)    \n",
+        "    return x\n",
+        "\n",
+        "def TransformerBlock(inputs, embed_dim, num_heads):\n",
+        "    att_output = layers.MultiHeadAttention(num_heads=num_heads, key_dim=embed_dim)(inputs, inputs)\n",
+        "    return layers.BatchNormalization()(att_output + inputs)    \n",
+        "\n",
+        "def get_model(num_heads, embed_dim=20, drop=0.1, lay_size=980, transformer=True):\n",
+        "    inputs = layers.Input(shape=(maxlen,))\n",
+        "    embedding_layer = TokenAndPositionEmbedding(maxlen, vocab_size+1, embed_dim)\n",
+        "    x = embedding_layer(inputs)\n",
+        "    if transformer:\n",
+        "        x_shortcut_transformer = x\n",
+        "        #これを増やせば増やすほど精度が上がりそう？\n",
+        "        x = TransformerBlock(x, embed_dim, num_heads)\n",
+        "        x = TransformerBlock(x, embed_dim, num_heads)\n",
+        "        x = TransformerBlock(x, embed_dim, num_heads)\n",
+        "        x = layers.Add()([x, x_shortcut_transformer])\n",
+        "\n",
+        "        x = TransformerBlock(x, embed_dim, num_heads)\n",
+        "        x = TransformerBlock(x, embed_dim, num_heads)\n",
+        "        x = TransformerBlock(x, embed_dim, num_heads) \n",
+        "        x = layers.Add()([x, x_shortcut_transformer])\n",
+        "\n",
+        "        x = TransformerBlock(x, embed_dim, num_heads)\n",
+        "        x = TransformerBlock(x, embed_dim, num_heads)\n",
+        "        x = TransformerBlock(x, embed_dim, num_heads) \n",
+        "        x = layers.Add()([x, x_shortcut_transformer])             \n",
+        "\n",
+        "    x = layers.Flatten()(x)\n",
+        "\n",
+        "    x_shortcut = x\n",
+        "    x = FCBlock(x, drop, lay_size, None)    \n",
+        "    x = FCBlock(x, drop, lay_size, None)\n",
+        "    x = FCBlock(x, drop, lay_size, None)\n",
+        "    x = FCBlock(x, drop, lay_size, x_shortcut)\n",
+        "\n",
+        "    x = FCBlock(x, drop, lay_size, None)    \n",
+        "    x = FCBlock(x, drop, lay_size, None)\n",
+        "    x = FCBlock(x, drop, lay_size, None)\n",
+        "    x = FCBlock(x, drop, lay_size, x_shortcut)        \n",
+        "\n",
+        "    outputs = layers.Dense(8, activation=\"sigmoid\")(x)\n",
+        "\n",
+        "    adam = optimizers.Adam(lr=0.001)\n",
+        "    model = keras.Model(inputs=inputs, outputs=outputs)\n",
+        "    \n",
+        "    model.compile(optimizer=adam, loss=\"binary_crossentropy\")\n",
+        "    lr_scheduler = LearningRateScheduler(decay_schedule)\n",
+        "\n",
+        "    model.fit(\n",
+        "        X_train, Y_train, batch_size=32, epochs=10, callbacks=[lr_scheduler], validation_data=(X_val, Y_val)\n",
+        "    ) \n",
+        "    predictions = model.predict(X_test[0:10])\n",
+        "    print(predictions)\n",
+        "\n",
+        "get_model(3)    "
+      ],
+      "metadata": {
+        "id": "ZUOyT9fHzciU",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "30647480-0ef2-4287-ef9b-407819aa5aa9"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/10\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.7/dist-packages/keras/optimizers/optimizer_v2/adam.py:110: UserWarning: The `lr` argument is deprecated, use `learning_rate` instead.\n",
+            "  super(Adam, self).__init__(name, **kwargs)\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "7836/7836 [==============================] - 186s 23ms/step - loss: 0.3356 - val_loss: 0.2279 - lr: 0.0010\n",
+            "Epoch 2/10\n",
+            "7836/7836 [==============================] - 176s 22ms/step - loss: 0.1692 - val_loss: 0.1148 - lr: 9.5000e-04\n",
+            "Epoch 3/10\n",
+            "7836/7836 [==============================] - 173s 22ms/step - loss: 0.0877 - val_loss: 0.0608 - lr: 9.0250e-04\n",
+            "Epoch 4/10\n",
+            "7836/7836 [==============================] - 174s 22ms/step - loss: 0.0472 - val_loss: 0.0366 - lr: 8.5737e-04\n",
+            "Epoch 5/10\n",
+            "7836/7836 [==============================] - 181s 23ms/step - loss: 0.0312 - val_loss: 0.0268 - lr: 8.1451e-04\n",
+            "Epoch 6/10\n",
+            "7836/7836 [==============================] - 172s 22ms/step - loss: 0.0228 - val_loss: 0.0158 - lr: 7.7378e-04\n",
+            "Epoch 7/10\n",
+            "3311/7836 [===========>..................] - ETA: 1:38 - loss: 0.0177"
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "accelerator": "GPU",
+    "colab": {
+      "provenance": [],
+      "include_colab_link": true
+    },
+    "gpuClass": "premium",
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
