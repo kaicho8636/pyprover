@@ -11,7 +11,7 @@
   | ("¬"|"~") c           -> l_not
 ?d: NAME                  -> identifier
   | "True"                -> l_true
-  | "False"               -> l_false
+  | "False"|"⊥"           -> l_false
   | "(" expr ")"
 
 %import common.CNAME -> NAME
